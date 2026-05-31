@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 import type { DomainEvent } from '@/features/events/types'
+import { stripHtml } from '@/shared/lib/stripHtml'
 
 /**
  * Instantané léger d'un événement mis en favori. On stocke juste de quoi rendre
@@ -66,7 +67,29 @@ export const useFavoritesStore = create<FavoritesState>()(
         }),
       clear: () => set({ items: {} }),
     }),
-    { name: 'parici:favorites', version: 1 },
+    {
+      name: 'parici:favorites',
+      version: 2,
+      // Les favoris d'avant le nettoyage HTML peuvent contenir des balises
+      // (ex. « <br /> » dans le libellé de date) : on les assainit au chargement.
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as {
+          items?: Record<string, FavoriteEvent>
+        }
+        if (version < 2 && state.items) {
+          const items: Record<string, FavoriteEvent> = {}
+          for (const [id, fav] of Object.entries(state.items)) {
+            items[id] = {
+              ...fav,
+              title: stripHtml(fav.title),
+              dateLabel: fav.dateLabel ? stripHtml(fav.dateLabel) : null,
+            }
+          }
+          return { items } as FavoritesState
+        }
+        return state as FavoritesState
+      },
+    },
   ),
 )
 

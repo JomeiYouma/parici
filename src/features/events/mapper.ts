@@ -1,19 +1,6 @@
-import type { ApiEvent, DomainEvent, GeoPoint } from './types'
+import { stripHtml } from '@/shared/lib/stripHtml'
 
-/** Retire les balises HTML et normalise les espaces (descriptions riches). */
-function stripHtml(html: string | null): string {
-  if (!html) return ''
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#39;|&rsquo;/g, '’')
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
+import type { ApiEvent, DomainEvent, GeoPoint } from './types'
 
 /** Déduit l'arrondissement (1–20) d'un code postal parisien (75001–75020). */
 function arrondissementFromZipcode(zipcode: string | null): number | null {
