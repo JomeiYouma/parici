@@ -60,22 +60,24 @@ function parseCategories(tags: string | null): string[] {
 export function mapApiEventToDomain(api: ApiEvent): DomainEvent | null {
   if (!api.id || !api.title) return null
 
+  const title = stripHtml(api.title) || api.title.trim()
+
   const image = api.cover_url
-    ? { url: api.cover_url, alt: api.cover_alt?.trim() || api.title }
+    ? { url: api.cover_url, alt: api.cover_alt?.trim() || title }
     : null
 
   const isFree = api.price_type?.toLowerCase() === 'gratuit'
 
   return {
     id: api.id,
-    title: api.title.trim(),
+    title,
     summary: stripHtml(api.lead_text),
     description: stripHtml(api.description),
     sourceUrl: api.url,
     image,
     dateStart: parseDate(api.date_start),
     dateEnd: parseDate(api.date_end),
-    dateLabel: api.date_description?.trim() || null,
+    dateLabel: stripHtml(api.date_description) || null,
     isFree,
     priceLabel: isFree
       ? 'Gratuit'

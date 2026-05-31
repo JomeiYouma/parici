@@ -46,6 +46,16 @@ describe('mapApiEventToDomain', () => {
     expect(event?.description).toBe('Venez nombreux !')
   })
 
+  it('retire le HTML du libellé de date (ex. <br />)', () => {
+    const event = mapApiEventToDomain(
+      makeApiEvent({
+        date_description: 'Du 29 juin au 3 juillet : <br />lundi<br /> 19h-20h30',
+      }),
+    )
+    expect(event?.dateLabel).toBe('Du 29 juin au 3 juillet : lundi 19h-20h30')
+    expect(event?.dateLabel).not.toContain('<br')
+  })
+
   it('déduit l’arrondissement du code postal', () => {
     expect(mapApiEventToDomain(makeApiEvent())?.place.arrondissement).toBe(19)
     expect(
