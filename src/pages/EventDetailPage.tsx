@@ -9,7 +9,7 @@ import {
   Ticket,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { Seo } from '@/app/Seo'
 import { formatEventDate, formatPlace } from '@/features/events/format'
@@ -21,14 +21,26 @@ import { Skeleton } from '@/shared/ui/skeleton'
 import { EmptyState, ErrorState } from '@/shared/ui/states'
 
 function BackLink() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Retour arrière réel : restitue la liste avec ses filtres. Si l'utilisateur
+  // est arrivé directement sur la fiche (lien profond, pas d'historique app),
+  // location.key vaut 'default' → on retombe proprement sur l'accueil.
+  const goBack = () => {
+    if (location.key !== 'default') navigate(-1)
+    else navigate('/')
+  }
+
   return (
-    <Link
-      to="/"
+    <button
+      type="button"
+      onClick={goBack}
       className="inline-flex items-center gap-2 text-sm font-medium text-ink-muted transition-colors hover:text-magenta-strong"
     >
       <ArrowLeft className="size-4" />
       Retour aux événements
-    </Link>
+    </button>
   )
 }
 
