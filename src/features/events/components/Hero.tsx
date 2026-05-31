@@ -96,15 +96,21 @@ export function Hero() {
           c’est <span className="text-magenta">par ici</span>.
         </motion.h1>
 
-        <motion.p
+        {/* Deux phrases séparées qui flanquent la tour (gap central libre) */}
+        <motion.div
           initial={animated ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.12 }}
-          className="mx-auto mt-5 max-w-xl text-lg font-medium text-navy"
+          className="mt-6 flex flex-col items-center gap-2 text-base font-medium text-navy sm:mt-8 sm:flex-row sm:items-start sm:justify-between sm:text-lg"
         >
-          Concerts, expositions, spectacles, balades… Découvrez les milliers
-          d’événements qui font vibrer la capitale, et gardez vos préférés.
-        </motion.p>
+          <p className="max-w-xs text-balance sm:max-w-[38%] sm:text-right">
+            Concerts, expositions, spectacles, balades…
+          </p>
+          <p className="max-w-xs text-balance sm:max-w-[38%] sm:text-left">
+            Découvrez les milliers d’événements qui font vibrer la capitale, et
+            gardez vos préférés.
+          </p>
+        </motion.div>
 
         <motion.div
           initial={animated ? { opacity: 0, y: 16 } : false}

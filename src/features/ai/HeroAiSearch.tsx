@@ -65,7 +65,7 @@ export function HeroAiSearch() {
           Décrivez l’événement que vous cherchez
         </label>
         <Sparkles
-          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-magenta"
+          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 fill-magenta-strong text-magenta-strong"
           aria-hidden
         />
         <input
