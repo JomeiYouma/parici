@@ -30,7 +30,8 @@ export function EventCard({ event }: { event: DomainEvent }) {
           </div>
         )}
 
-        <div className="absolute right-3 top-3">
+        {/* z-10 pour passer au-dessus de l'overlay de lien du titre */}
+        <div className="absolute right-3 top-3 z-10">
           <FavoriteButton event={event} />
         </div>
 
