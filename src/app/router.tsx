@@ -15,6 +15,16 @@ const EventDetailPage = lazy(() =>
 const FavoritesPage = lazy(() =>
   import('@/pages/FavoritesPage').then((m) => ({ default: m.FavoritesPage })),
 )
+const MentionsLegalesPage = lazy(() =>
+  import('@/pages/MentionsLegalesPage').then((m) => ({
+    default: m.MentionsLegalesPage,
+  })),
+)
+const ConfidentialitePage = lazy(() =>
+  import('@/pages/ConfidentialitePage').then((m) => ({
+    default: m.ConfidentialitePage,
+  })),
+)
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 )
@@ -31,6 +41,8 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'event/:id', element: lazyRoute(<EventDetailPage />) },
       { path: 'favoris', element: lazyRoute(<FavoritesPage />) },
+      { path: 'mentions-legales', element: lazyRoute(<MentionsLegalesPage />) },
+      { path: 'confidentialite', element: lazyRoute(<ConfidentialitePage />) },
       { path: '*', element: lazyRoute(<NotFoundPage />) },
     ],
   },
