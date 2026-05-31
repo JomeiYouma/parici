@@ -5,8 +5,9 @@ import { EIFFEL_ART, EIFFEL_TRANSFORM, EIFFEL_VIEWBOX } from './eiffelArt'
 /**
  * Tour Eiffel (vrai dessin SVG importé) en « vue éclatée ». Le dessin est défini
  * une fois puis découpé en bandes horizontales (clipPath). Au scroll, la tour
- * tient d'abord sa forme, puis ses bandes se dispersent vers le haut en
- * s'estompant — disparition progressive avant la section suivante.
+ * tient d'abord sa forme, puis ses bandes fuient vers l'extérieur ET vers le bas
+ * en suivant des trajectoires courbes (translation latérale + chute façon
+ * gravité + rotation autour du cœur de la tour), avant de s'estomper.
  *
  * Le haut de la tour est atténué en permanence (masque dégradé) pour garder le
  * titre lisible. On n'anime que transform/opacity (GPU) ; repli statique si reduce.
@@ -14,25 +15,26 @@ import { EIFFEL_ART, EIFFEL_TRANSFORM, EIFFEL_VIEWBOX } from './eiffelArt'
 
 const NAVY = '#083d77'
 
-// Atténue le sommet de façon permanente (le bas reste à pleine opacité).
-const TOP_FADE =
-  'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.12) 14%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 100%)'
-
 interface Band {
   id: number
   y0: number
   y1: number
+  /** Décalage latéral final (alterné = dispersion vers l'extérieur). */
   dx: number
+  /** Chute finale (vers le bas, plus forte pour les bandes basses). */
   dy: number
+  /** Rotation finale (tumbling autour du cœur de la tour). */
+  rot: number
 }
 
-// viewBox ≈ 0 0 567 759. Dispersion à dominante verticale (sortie vers le haut).
+// viewBox ≈ 0 0 567 759. Les bandes partent vers des côtés opposés, et plus bas
+// à mesure qu'on descend → effet d'effondrement courbe et aéré.
 const BANDS: Band[] = [
-  { id: 0, y0: 0, y1: 150, dx: 36, dy: -130 },
-  { id: 1, y0: 150, y1: 320, dx: -84, dy: -168 },
-  { id: 2, y0: 320, y1: 470, dx: 110, dy: -120 },
-  { id: 3, y0: 470, y1: 610, dx: -96, dy: -78 },
-  { id: 4, y0: 610, y1: 760, dx: 56, dy: -44 },
+  { id: 0, y0: 0, y1: 150, dx: -150, dy: 70, rot: -12 },
+  { id: 1, y0: 150, y1: 320, dx: 200, dy: 110, rot: 12 },
+  { id: 2, y0: 320, y1: 470, dx: -240, dy: 150, rot: -10 },
+  { id: 3, y0: 470, y1: 610, dx: 210, dy: 200, rot: 13 },
+  { id: 4, y0: 610, y1: 760, dx: -170, dy: 260, rot: -9 },
 ]
 
 function BandSlice({
@@ -44,14 +46,29 @@ function BandSlice({
   progress: MotionValue<number>
   reduce: boolean
 }) {
-  // La tour tient sa forme au début (peu de mouvement), puis accélère (easeIn).
-  const x = useTransform(progress, [0, 0.5, 1], [0, band.dx * 0.16, band.dx])
-  const y = useTransform(progress, [0, 0.5, 1], [0, band.dy * 0.16, band.dy])
-  // Fondu complet avant 0.9 → la tour a disparu avant la section suivante.
-  const opacity = useTransform(progress, [0, 0.55, 0.9], [1, 1, 0])
+  // Courbe : départ latéral quasi linéaire, chute « gravité » (lente puis rapide)
+  // → la combinaison dessine une parabole. La rotation ajoute le tumbling.
+  const x = useTransform(progress, [0, 0.55, 1], [0, band.dx * 0.4, band.dx])
+  const y = useTransform(progress, [0, 0.55, 1], [0, band.dy * 0.12, band.dy])
+  const rotate = useTransform(progress, [0, 1], [0, band.rot])
+  // Visible longtemps (jusqu'à 70 %), puis fondu complet avant la section suivante.
+  const opacity = useTransform(progress, [0, 0.7, 1], [1, 1, 0])
 
   return (
-    <motion.g style={reduce ? undefined : { x, y, opacity }}>
+    <motion.g
+      style={
+        reduce
+          ? undefined
+          : {
+              x,
+              y,
+              rotate,
+              opacity,
+              transformBox: 'fill-box',
+              transformOrigin: 'center',
+            }
+      }
+    >
       <g clipPath={`url(#eiffel-band-${band.id})`}>
         <use href="#eiffel-art" />
       </g>
@@ -75,14 +92,27 @@ export function EiffelTower({
       role="img"
       aria-label="Tour Eiffel stylisée"
       preserveAspectRatio="xMidYMax meet"
-      style={{ maskImage: TOP_FADE, WebkitMaskImage: TOP_FADE }}
+      style={{ overflow: 'visible' }}
     >
       <defs>
+        {/* Fondu du haut baké dans le dessin (indépendant des transforms) :
+            le sommet reste atténué pour la lisibilité du titre. */}
+        <linearGradient id="eiffel-fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#000" />
+          <stop offset="0.14" stopColor="#1f1f1f" />
+          <stop offset="0.4" stopColor="#fff" />
+          <stop offset="1" stopColor="#fff" />
+        </linearGradient>
+        <mask id="eiffel-topfade" maskContentUnits="objectBoundingBox">
+          <rect x="0" y="0" width="1" height="1" fill="url(#eiffel-fade)" />
+        </mask>
+
         {/* Le dessin, défini une fois et réutilisé par chaque bande. */}
         <g
           id="eiffel-art"
           transform={EIFFEL_TRANSFORM}
           fill={NAVY}
+          mask="url(#eiffel-topfade)"
           dangerouslySetInnerHTML={{ __html: EIFFEL_ART }}
         />
         {BANDS.map((band) => (
