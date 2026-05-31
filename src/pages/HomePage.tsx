@@ -1,8 +1,8 @@
 import { useSearchParams } from 'react-router-dom'
 
 import { Seo } from '@/app/Seo'
-import { AiSearchPanel } from '@/features/ai/AiSearchPanel'
-import { EVENTS_ANCHOR, Hero } from '@/features/events/components/Hero'
+import { EVENTS_ANCHOR } from '@/features/events/anchor'
+import { Hero } from '@/features/events/components/Hero'
 import { EventList } from '@/features/events/components/EventList'
 import { FilterBar } from '@/features/events/components/FilterBar'
 import { Pagination } from '@/features/events/components/Pagination'
@@ -54,10 +54,6 @@ export function HomePage() {
                 } à découvrir`
               : 'Chargement…'}
           </p>
-        </div>
-
-        <div className="mb-6">
-          <AiSearchPanel />
         </div>
 
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">

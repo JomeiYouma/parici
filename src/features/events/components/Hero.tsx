@@ -1,24 +1,16 @@
-import { ArrowDown, Sparkles } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { useRef } from 'react'
 
+import { HeroAiSearch } from '@/features/ai/HeroAiSearch'
 import { Button } from '@/shared/ui/button'
 
+import { scrollToEvents } from '../anchor'
 import { EiffelTower } from './EiffelTower'
 
-/** Cible d'ancrage du CTA (section liste). */
-export const EVENTS_ANCHOR = 'events'
-
-function scrollToEvents(smooth: boolean) {
-  document.getElementById(EVENTS_ANCHOR)?.scrollIntoView({
-    behavior: smooth ? 'smooth' : 'auto',
-    block: 'start',
-  })
-}
-
 /**
- * Hero plein écran. Une Tour Eiffel stylisée se disloque au scroll (vue éclatée)
- * pendant que le titre s'estompe. Contraintes (cf. docs/DEMARCHE.md §4) : on
+ * Hero plein écran. Une Tour Eiffel (vrai dessin SVG) se disperse au scroll
+ * pendant que le texte s'estompe. Contraintes (cf. docs/DEMARCHE.md §4) : on
  * n'anime QUE transform/opacity (composités GPU) ; repli statique (tour
  * assemblée, texte fixe) si l'utilisateur réduit les animations.
  */
@@ -31,9 +23,9 @@ export function Hero() {
     offset: ['start start', 'end start'],
   })
 
-  // Texte : translation faible + fondu pendant que la tour se déconstruit.
-  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-12%'])
-  const textOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  // Texte : translation faible + fondu progressif pendant que la tour se disperse.
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-14%'])
+  const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
   const washY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%'])
 
   return (
@@ -52,7 +44,7 @@ export function Hero() {
         <div className="absolute -left-24 top-1/3 size-72 rounded-full bg-coral/20 blur-3xl" />
       </motion.div>
 
-      {/* Tour Eiffel éclatée (plan intermédiaire), ancrée en bas */}
+      {/* Tour Eiffel (plan intermédiaire), ancrée en bas */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 flex justify-center"
@@ -64,31 +56,24 @@ export function Hero() {
         />
       </div>
 
-      {/* Plan avant : titre + sous-titre + CTA */}
+      {/* Plan avant : recherche + titre + sous-titre + CTA */}
       <motion.div
         style={animated ? { y: textY, opacity: textOpacity } : undefined}
-        className="relative z-10 mx-auto max-w-3xl px-4 pt-[13vh] text-center sm:px-6 sm:pt-[15vh]"
+        className="relative z-10 mx-auto w-full max-w-3xl px-4 pt-[13vh] text-center sm:px-6 sm:pt-[15vh]"
       >
-        {/* Halo « papier » : détache le texte de la tour (lisibilité) */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_62%_50%_at_50%_40%,rgba(235,235,211,0.75),rgba(235,235,211,0)_72%)]"
-        />
-        <motion.span
+        <motion.div
           initial={animated ? { opacity: 0, y: 12 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface/80 px-4 py-1.5 text-sm font-medium text-ink-muted backdrop-blur"
         >
-          <Sparkles className="size-4 text-magenta" aria-hidden />
-          L’agenda culturel de la Ville de Paris
-        </motion.span>
+          <HeroAiSearch />
+        </motion.div>
 
         <motion.h1
           initial={animated ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl"
+          className="mt-7 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl"
         >
           Sortir à Paris,
           <br />
@@ -99,7 +84,7 @@ export function Hero() {
           initial={animated ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.12 }}
-          className="mx-auto mt-5 max-w-xl text-lg text-ink-muted"
+          className="mx-auto mt-5 max-w-xl text-lg font-medium text-magenta-strong"
         >
           Concerts, expositions, spectacles, balades… Découvrez les milliers
           d’événements qui font vibrer la capitale, et gardez vos préférés.
@@ -116,18 +101,6 @@ export function Hero() {
             <ArrowDown className="size-4" />
           </Button>
         </motion.div>
-
-        {animated && (
-          <motion.p
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            className="mt-14 text-xs uppercase tracking-[0.2em] text-ink-muted/70"
-          >
-            Faites défiler
-          </motion.p>
-        )}
       </motion.div>
     </section>
   )
