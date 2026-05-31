@@ -5,7 +5,7 @@ interface SeoProps {
   description?: string
 }
 
-const SITE_NAME = 'Parici'
+const SITE_NAME = 'Parici ?'
 const DEFAULT_DESCRIPTION =
   'Trouvez facilement concerts, expositions, spectacles et sorties à Paris.'
 

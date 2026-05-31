@@ -23,7 +23,7 @@ export function Header() {
             className="size-9 transition-transform group-hover:-rotate-6"
           />
           <span className="font-display text-xl font-semibold tracking-tight">
-            Parici
+            Parici&nbsp;?
           </span>
         </Link>
 
