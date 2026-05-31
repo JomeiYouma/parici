@@ -1,4 +1,4 @@
-import { Heart, MapPin } from 'lucide-react'
+import { Heart } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 
 import { useFavoritesCount } from '@/features/favorites/store'
@@ -15,9 +15,13 @@ export function Header() {
           to="/"
           className="group inline-flex items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-magenta"
         >
-          <span className="grid size-9 place-items-center rounded-xl bg-navy text-paper transition-transform group-hover:-rotate-6">
-            <MapPin className="size-5" />
-          </span>
+          <img
+            src="/favicon.svg"
+            alt=""
+            width="36"
+            height="36"
+            className="size-9 transition-transform group-hover:-rotate-6"
+          />
           <span className="font-display text-xl font-semibold tracking-tight">
             Parici
           </span>
