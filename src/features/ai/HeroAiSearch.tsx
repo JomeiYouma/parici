@@ -64,10 +64,6 @@ export function HeroAiSearch() {
         <label htmlFor="hero-ai" className="sr-only">
           Décrivez l’événement que vous cherchez
         </label>
-        <Sparkles
-          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 fill-magenta text-magenta"
-          aria-hidden
-        />
         <input
           id="hero-ai"
           type="text"
@@ -76,6 +72,11 @@ export function HeroAiSearch() {
           placeholder="Décrivez votre envie de sortie…"
           maxLength={400}
           className="h-12 w-full rounded-full border border-surface-border bg-surface/85 pl-12 pr-14 text-base text-navy shadow-sm backdrop-blur outline-none transition-colors placeholder:text-ink-muted focus:border-magenta focus-visible:outline-2 focus-visible:outline-magenta"
+        />
+        {/* Après l'input dans le DOM (et z-10) pour passer AU-DESSUS de son fond */}
+        <Sparkles
+          className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 fill-magenta text-magenta"
+          aria-hidden
         />
         <button
           type="submit"
