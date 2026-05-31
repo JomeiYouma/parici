@@ -4,6 +4,8 @@ import { useRef } from 'react'
 
 import { Button } from '@/shared/ui/button'
 
+import { EiffelTower } from './EiffelTower'
+
 /** Cible d'ancrage du CTA (section liste). */
 export const EVENTS_ANCHOR = 'events'
 
@@ -15,52 +17,63 @@ function scrollToEvents(smooth: boolean) {
 }
 
 /**
- * Hero plein écran avec parallax piloté au scroll.
- * Contraintes (cf. docs/DEMARCHE.md §4) : on n'anime QUE transform/opacity
- * (composités GPU) ; repli statique si l'utilisateur réduit les animations.
+ * Hero plein écran. Une Tour Eiffel stylisée se disloque au scroll (vue éclatée)
+ * pendant que le titre s'estompe. Contraintes (cf. docs/DEMARCHE.md §4) : on
+ * n'anime QUE transform/opacity (composités GPU) ; repli statique (tour
+ * assemblée, texte fixe) si l'utilisateur réduit les animations.
  */
 export function Hero() {
   const reduceMotion = useReducedMotion()
+  const animated = !reduceMotion
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
   })
 
-  // Plan arrière : translation forte. Plan avant : translation faible + fondu.
-  const backY = useTransform(scrollYProgress, [0, 1], ['0%', '-30%'])
-  const frontY = useTransform(scrollYProgress, [0, 1], ['0%', '-8%'])
-  const frontOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-
-  const animated = !reduceMotion
+  // Texte : translation faible + fondu pendant que la tour se déconstruit.
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-12%'])
+  const textOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  const washY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%'])
 
   return (
     <section
       ref={ref}
-      className="relative flex min-h-[88svh] items-center justify-center overflow-hidden"
+      className="relative flex min-h-[92svh] flex-col items-center overflow-hidden"
     >
-      {/* Plan arrière décoratif (blobs colorés, composités GPU) */}
+      {/* Fond dégradé + halos colorés (plan le plus lointain) */}
       <motion.div
         aria-hidden
-        style={animated ? { y: backY } : undefined}
-        className="pointer-events-none absolute inset-0 -z-10"
+        style={animated ? { y: washY } : undefined}
+        className="absolute inset-0 -z-20"
       >
         <div className="absolute inset-0 bg-gradient-to-b from-paper via-coral/10 to-paper" />
-        <div className="absolute -left-24 top-10 size-72 rounded-full bg-coral/25 blur-3xl sm:size-96" />
-        <div className="absolute right-[-6rem] top-1/3 size-80 rounded-full bg-gold/30 blur-3xl sm:size-[28rem]" />
-        <div className="absolute bottom-[-4rem] left-1/3 size-72 rounded-full bg-magenta/15 blur-3xl" />
+        <div className="absolute right-[-6rem] top-24 size-80 rounded-full bg-gold/25 blur-3xl sm:size-[26rem]" />
+        <div className="absolute -left-24 top-1/3 size-72 rounded-full bg-coral/20 blur-3xl" />
       </motion.div>
+
+      {/* Tour Eiffel éclatée (plan intermédiaire), ancrée en bas */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 flex justify-center"
+      >
+        <EiffelTower
+          progress={scrollYProgress}
+          reduce={!animated}
+          className="h-[78svh] w-auto max-w-none"
+        />
+      </div>
 
       {/* Plan avant : titre + sous-titre + CTA */}
       <motion.div
-        style={animated ? { y: frontY, opacity: frontOpacity } : undefined}
-        className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6"
+        style={animated ? { y: textY, opacity: textOpacity } : undefined}
+        className="relative z-10 mx-auto max-w-3xl px-4 pt-[13vh] text-center sm:px-6 sm:pt-[15vh]"
       >
         <motion.span
           initial={animated ? { opacity: 0, y: 12 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface/70 px-4 py-1.5 text-sm font-medium text-ink-muted backdrop-blur"
+          className="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface/80 px-4 py-1.5 text-sm font-medium text-ink-muted backdrop-blur"
         >
           <Sparkles className="size-4 text-magenta" aria-hidden />
           L’agenda culturel de la Ville de Paris
@@ -93,11 +106,23 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-8"
         >
-          <Button size="lg" onClick={() => scrollToEvents(animated ?? false)}>
+          <Button size="lg" onClick={() => scrollToEvents(animated)}>
             Explorer les événements
             <ArrowDown className="size-4" />
           </Button>
         </motion.div>
+
+        {animated && (
+          <motion.p
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.6 }}
+            className="mt-14 text-xs uppercase tracking-[0.2em] text-ink-muted/70"
+          >
+            Faites défiler
+          </motion.p>
+        )}
       </motion.div>
     </section>
   )
