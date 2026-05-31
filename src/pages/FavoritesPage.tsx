@@ -55,7 +55,7 @@ function FavoriteCard({ favorite }: { favorite: FavoriteEvent }) {
             <span className="line-clamp-2">{favorite.title}</span>
           </Link>
         </h3>
-        <p className="mt-auto text-sm text-ink-muted">
+        <p className="mt-auto line-clamp-2 whitespace-pre-line text-sm text-ink-muted">
           {favorite.dateLabel ?? (arr !== null ? `Paris ${arr}e` : 'Paris')}
         </p>
       </div>

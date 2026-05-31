@@ -46,9 +46,9 @@ function BackLink() {
 
 function MetaRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <p className="flex items-center gap-2.5 text-ink-muted">
-      <span className="text-coral">{icon}</span>
-      <span>{children}</span>
+    <p className="flex items-start gap-2.5 text-ink-muted">
+      <span className="mt-0.5 text-coral">{icon}</span>
+      <span className="whitespace-pre-line">{children}</span>
     </p>
   )
 }
