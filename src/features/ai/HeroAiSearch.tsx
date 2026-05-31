@@ -1,4 +1,4 @@
-import { Loader2, Search } from 'lucide-react'
+import { Loader2, Search, Sparkles } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
@@ -52,7 +52,7 @@ export function HeroAiSearch() {
     } else {
       keywordSearch(text)
       if (result.status === 'not_configured') {
-        setHint('Recherche par mot-clé (IA non activée sur ce déploiement).')
+        setHint('Pas de clé OpenAI configurée.')
       }
     }
     scrollToEvents()
@@ -64,6 +64,10 @@ export function HeroAiSearch() {
         <label htmlFor="hero-ai" className="sr-only">
           Décrivez l’événement que vous cherchez
         </label>
+        <Sparkles
+          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-magenta"
+          aria-hidden
+        />
         <input
           id="hero-ai"
           type="text"
@@ -71,7 +75,7 @@ export function HeroAiSearch() {
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Décrivez votre envie de sortie…"
           maxLength={400}
-          className="h-12 w-full rounded-full border border-surface-border bg-surface/85 pl-5 pr-14 text-base text-navy shadow-sm backdrop-blur outline-none transition-colors placeholder:text-ink-muted focus:border-magenta focus-visible:outline-2 focus-visible:outline-magenta"
+          className="h-12 w-full rounded-full border border-surface-border bg-surface/85 pl-12 pr-14 text-base text-navy shadow-sm backdrop-blur outline-none transition-colors placeholder:text-ink-muted focus:border-magenta focus-visible:outline-2 focus-visible:outline-magenta"
         />
         <button
           type="submit"

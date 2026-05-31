@@ -8,11 +8,24 @@ import { Button } from '@/shared/ui/button'
 import { scrollToEvents } from '../anchor'
 import { EiffelTower } from './EiffelTower'
 
+const RADIAL =
+  'radial-gradient(ellipse 60% 55% at 50% 44%, rgba(0,0,0,1) 34%, rgba(0,0,0,0) 78%)'
+
+/**
+ * Flou très localisé : adoucit la tour UNIQUEMENT derrière le texte (frosted
+ * glass feutré par un masque radial) pour la lisibilité, sans toucher au reste.
+ */
+const BLUR_STYLE = {
+  backdropFilter: 'blur(7px)',
+  WebkitBackdropFilter: 'blur(7px)',
+  maskImage: RADIAL,
+  WebkitMaskImage: RADIAL,
+} as const
+
 /**
  * Hero plein écran. Une Tour Eiffel (vrai dessin SVG) se disperse au scroll
  * pendant que le texte s'estompe. Contraintes (cf. docs/DEMARCHE.md §4) : on
- * n'anime QUE transform/opacity (composités GPU) ; repli statique (tour
- * assemblée, texte fixe) si l'utilisateur réduit les animations.
+ * n'anime QUE transform/opacity (composités GPU) ; repli statique si reduce.
  */
 export function Hero() {
   const reduceMotion = useReducedMotion()
@@ -23,16 +36,12 @@ export function Hero() {
     offset: ['start start', 'end start'],
   })
 
-  // Texte : translation faible + fondu progressif pendant que la tour se disperse.
   const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-14%'])
   const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
   const washY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%'])
 
   return (
-    <section
-      ref={ref}
-      className="relative flex min-h-[92svh] flex-col items-center overflow-hidden"
-    >
+    <section ref={ref} className="relative flex min-h-[92svh] flex-col items-center overflow-hidden">
       {/* Fond dégradé + halos colorés (plan le plus lointain) */}
       <motion.div
         aria-hidden
@@ -55,6 +64,13 @@ export function Hero() {
           className="h-[78svh] w-auto max-w-none"
         />
       </div>
+
+      {/* Flou localisé derrière le texte (au-dessus de la tour, sous le texte) */}
+      <motion.div
+        aria-hidden
+        style={animated ? { ...BLUR_STYLE, y: textY, opacity: textOpacity } : BLUR_STYLE}
+        className="pointer-events-none absolute inset-x-0 top-[14vh] mx-auto h-[36vh] w-[min(720px,94vw)] bg-paper/15"
+      />
 
       {/* Plan avant : recherche + titre + sous-titre + CTA */}
       <motion.div
@@ -84,7 +100,7 @@ export function Hero() {
           initial={animated ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.12 }}
-          className="mx-auto mt-5 max-w-xl text-lg font-medium text-magenta-strong"
+          className="mx-auto mt-5 max-w-xl text-lg font-medium text-navy"
         >
           Concerts, expositions, spectacles, balades… Découvrez les milliers
           d’événements qui font vibrer la capitale, et gardez vos préférés.
