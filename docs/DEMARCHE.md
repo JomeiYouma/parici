@@ -135,6 +135,14 @@ devient un **bottom-sheet** (feuille ancrée en bas) déclenché par un bouton
 repo, même avec une cible de prod statique, pour disposer d'un artefact conteneurisé
 reproductible et démontrer la maîtrise de la chaîne.
 
+**Décision : une fonction serverless pour la recherche par IA (entorse assumée).**
+L'app reste « front pur » à une exception près : une fonction serverless Vercel
+(`/api/ai-search`) qui traduit une envie en langage naturel en *filtres* via un LLM.
+Justification : une clé d'API ne peut pas vivre dans un front statique (vol immédiat),
+il faut donc un proxy minimal côté serveur. Le LLM n'invente aucun événement (il
+produit des filtres, bornés côté serveur), et la fonctionnalité **dégrade
+proprement** sans clé — le déploiement par défaut reste sans secret.
+
 ## 8. Ce qui resterait à faire
 
 - Vue carte (Leaflet) et partage d'URL enrichi.

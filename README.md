@@ -22,6 +22,8 @@ spectacles et sorties à Paris — propulsée par l’agenda open data de la Vil
   au rafraîchissement et fonctionne avec les boutons précédent / suivant.
 - ❤️ **Favoris** enregistrés localement (sans compte), avec mise à jour optimiste.
 - 📄 **Page détail** par événement (`/event/:id`), avec infos d’accessibilité.
+- 🤖 **Recherche par IA** *(optionnelle)* : décrivez votre envie en langage
+  naturel, un LLM la traduit en **filtres** — la donnée affichée reste 100 % réelle.
 - 🖼️ **Hero parallax** au scroll, désactivé si `prefers-reduced-motion`.
 - 📱 **Mobile-first** : grille fluide, filtres en bottom-sheet, cibles tactiles ≥ 44 px.
 - ♿ **Accessibilité** : primitives Radix, navigation clavier, contrastes AA.
@@ -140,6 +142,23 @@ Un [`Dockerfile`](./Dockerfile) multi-stage (build Node → runtime Nginx) est f
 docker build -t parici .
 docker run --rm -p 8080:80 parici   # http://localhost:8080
 ```
+
+## 🤖 Recherche par IA (optionnelle)
+
+Une fonction serverless [`api/ai-search.ts`](./api/ai-search.ts) traduit une envie
+en langage naturel (« un concert gratuit ce week-end ») en **filtres structurés**,
+ensuite appliqués à la vraie API Paris. Le LLM **n’invente aucun événement** : il ne
+produit que des filtres, et le serveur les borne avant de répondre.
+
+- **La clé OpenAI reste côté serveur** (variable d’env `OPENAI_API_KEY` sur Vercel),
+  jamais exposée au navigateur — c’est la seule entorse au « front pur », assumée.
+- **Sans clé, l’app fonctionne normalement** : la recherche IA affiche un message
+  « non configuré ». Le déploiement par défaut ne requiert donc aucun secret.
+- Pour l’activer : ajoutez `OPENAI_API_KEY` dans les variables d’environnement Vercel
+  (voir [`.env.example`](./.env.example)). Pour masquer l’UI : `VITE_AI_ENABLED=false`.
+
+> En local, `npm run dev` ne sert pas les fonctions `/api` ; utilisez `vercel dev`
+> pour les tester.
 
 ## ♿ Accessibilité & SEO
 
