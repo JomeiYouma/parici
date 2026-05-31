@@ -69,6 +69,11 @@ export function Hero() {
         style={animated ? { y: textY, opacity: textOpacity } : undefined}
         className="relative z-10 mx-auto max-w-3xl px-4 pt-[13vh] text-center sm:px-6 sm:pt-[15vh]"
       >
+        {/* Halo « papier » : détache le texte de la tour (lisibilité) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_62%_50%_at_50%_40%,rgba(235,235,211,0.75),rgba(235,235,211,0)_72%)]"
+        />
         <motion.span
           initial={animated ? { opacity: 0, y: 12 } : false}
           animate={{ opacity: 1, y: 0 }}

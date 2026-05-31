@@ -1,82 +1,52 @@
-import {
-  motion,
-  useTransform,
-  type MotionValue,
-} from 'motion/react'
+import { motion, useTransform, type MotionValue } from 'motion/react'
+
+import { EIFFEL_ART, EIFFEL_TRANSFORM, EIFFEL_VIEWBOX } from './eiffelArt'
 
 /**
- * Tour Eiffel stylisée en « vue éclatée ». Chaque pièce est un fragment SVG qui
- * se disloque au scroll (translation + rotation + fondu), façon schéma technique.
- * Tout est piloté par `progress` (0 = tour assemblée, 1 = éclatée).
+ * Tour Eiffel (vrai dessin SVG importé) en « vue éclatée ». Le dessin est défini
+ * une seule fois, puis découpé en bandes horizontales par `clipPath` ; chaque
+ * bande dérive au scroll (translation + fondu) → la tour se déconstruit.
+ * On n'anime que transform/opacity (GPU) ; repli statique si reduce.
  */
 
-interface Piece {
-  id: string
-  d: string
-  /** Vecteur de dispersion (unités du viewBox) et rotation cible. */
+const NAVY = '#083d77'
+
+// viewBox ≈ 0 0 567 759. Bandes [yStart, yEnd] et vecteur de dispersion.
+interface Band {
+  id: number
+  y0: number
+  y1: number
   dx: number
   dy: number
-  rotate: number
-  /** Pièce d'accent (pointe magenta). */
-  accent?: boolean
-  /** Tracé non rempli (l'arche). */
-  outline?: boolean
 }
 
-// viewBox 0 0 240 346 — silhouette assemblée, centrée sur x = 120.
-const PIECES: Piece[] = [
-  { id: 'spire', d: 'M120 14 L124 64 L116 64 Z', dx: 0, dy: -190, rotate: -6, accent: true },
-  { id: 'top', d: 'M116 66 L124 66 L130 116 L110 116 Z', dx: 70, dy: -126, rotate: 12 },
-  { id: 'platform-2', d: 'M104 116 L136 116 L136 126 L104 126 Z', dx: 146, dy: -48, rotate: 9 },
-  { id: 'body', d: 'M110 126 L130 126 L150 206 L90 206 Z', dx: -120, dy: -18, rotate: -10 },
-  { id: 'platform-1', d: 'M80 200 L160 200 L160 214 L80 214 Z', dx: -152, dy: 56, rotate: -7 },
-  { id: 'leg-left', d: 'M112 214 L96 214 L46 332 L74 332 Z', dx: -94, dy: 132, rotate: -13 },
-  { id: 'leg-right', d: 'M128 214 L144 214 L194 332 L166 332 Z', dx: 94, dy: 132, rotate: 13 },
-  { id: 'arch', d: 'M74 300 Q120 250 166 300', dx: 0, dy: 104, rotate: 0, outline: true },
+const BANDS: Band[] = [
+  { id: 0, y0: 0, y1: 150, dx: 50, dy: -160 },
+  { id: 1, y0: 150, y1: 320, dx: -130, dy: -70 },
+  { id: 2, y0: 320, y1: 470, dx: 150, dy: -10 },
+  { id: 3, y0: 470, y1: 610, dx: -150, dy: 70 },
+  { id: 4, y0: 610, y1: 760, dx: 40, dy: 170 },
 ]
 
-const NAVY = '#083d77'
-const MAGENTA = '#da4167'
-
-function TowerPiece({
-  piece,
+function BandSlice({
+  band,
   progress,
   reduce,
 }: {
-  piece: Piece
+  band: Band
   progress: MotionValue<number>
   reduce: boolean
 }) {
-  const x = useTransform(progress, [0, 1], [0, piece.dx])
-  const y = useTransform(progress, [0, 1], [0, piece.dy])
-  const rotate = useTransform(progress, [0, 1], [0, piece.rotate])
-  const opacity = useTransform(progress, [0, 0.85], [1, 0.16])
-
-  const fill = piece.outline ? 'none' : piece.accent ? MAGENTA : NAVY
+  const x = useTransform(progress, [0, 1], [0, band.dx])
+  const y = useTransform(progress, [0, 1], [0, band.dy])
+  const opacity = useTransform(progress, [0, 0.85], [1, 0.15])
 
   return (
-    <motion.path
-      d={piece.d}
-      fill={fill}
-      fillOpacity={piece.accent ? 0.85 : piece.outline ? 0 : 0.12}
-      stroke={piece.accent ? 'none' : NAVY}
-      strokeOpacity={piece.outline ? 0.45 : 0.5}
-      strokeWidth={piece.outline ? 1.4 : 1.1}
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      style={
-        reduce
-          ? undefined
-          : {
-              x,
-              y,
-              rotate,
-              opacity,
-              transformBox: 'fill-box',
-              transformOrigin: 'center',
-            }
-      }
-    />
+    <motion.g style={reduce ? undefined : { x, y, opacity }}>
+      <g clipPath={`url(#eiffel-band-${band.id})`}>
+        <use href="#eiffel-art" />
+      </g>
+    </motion.g>
   )
 }
 
@@ -91,16 +61,32 @@ export function EiffelTower({
 }) {
   return (
     <svg
-      viewBox="0 0 240 346"
+      viewBox={EIFFEL_VIEWBOX}
       className={className}
       role="img"
       aria-label="Tour Eiffel stylisée"
       preserveAspectRatio="xMidYMax meet"
     >
-      {PIECES.map((piece) => (
-        <TowerPiece
-          key={piece.id}
-          piece={piece}
+      <defs>
+        {/* Le dessin, défini une fois et réutilisé par chaque bande. */}
+        <g
+          id="eiffel-art"
+          transform={EIFFEL_TRANSFORM}
+          fill={NAVY}
+          fillOpacity={0.42}
+          dangerouslySetInnerHTML={{ __html: EIFFEL_ART }}
+        />
+        {BANDS.map((band) => (
+          <clipPath key={band.id} id={`eiffel-band-${band.id}`}>
+            <rect x={-80} y={band.y0} width={760} height={band.y1 - band.y0} />
+          </clipPath>
+        ))}
+      </defs>
+
+      {BANDS.map((band) => (
+        <BandSlice
+          key={band.id}
+          band={band}
           progress={progress}
           reduce={reduce}
         />
