@@ -24,9 +24,11 @@ spectacles et sorties à Paris — propulsée par l’agenda open data de la Vil
 - 📄 **Page détail** par événement (`/event/:id`), avec infos d’accessibilité.
 - 🤖 **Recherche par IA** *(optionnelle)* : décrivez votre envie en langage
   naturel, un LLM la traduit en **filtres** — la donnée affichée reste 100 % réelle.
-- 🖼️ **Hero parallax** au scroll, désactivé si `prefers-reduced-motion`.
+- 🗼 **Hero animé** : une Tour Eiffel (vrai SVG) se déconstruit au scroll, désactivé
+  sous `prefers-reduced-motion`.
 - 📱 **Mobile-first** : grille fluide, filtres en bottom-sheet, cibles tactiles ≥ 44 px.
 - ♿ **Accessibilité** : primitives Radix, navigation clavier, contrastes AA.
+- ⚖️ **Pages légales** : mentions légales + politique de confidentialité.
 
 ## 🧱 Stack
 
@@ -56,15 +58,17 @@ d’Opendatasoft (CORS activé, **aucune clé requise**, GET/JSON, requêtes ODS
 Organisation **feature-based** :
 
 ```
+api/                    fonction serverless Vercel (recherche IA, optionnelle)
 src/
-├─ app/                 providers (QueryClient, Router, Helmet), layout, routing
+├─ app/                 providers (QueryClient, Router), layout, routing, Seo
 ├─ features/
-│  ├─ events/           api · mapper · types · hooks · filtres · composants
-│  └─ favorites/        store Zustand persisté + bouton favori
-├─ pages/               Home, EventDetail, Favorites, NotFound
+│  ├─ events/           api · mapper · types · hooks · filtres · composants (dont Hero)
+│  ├─ favorites/        store Zustand persisté + bouton favori
+│  └─ ai/               client + champ de recherche IA (traduction envie → filtres)
+├─ pages/               Home, EventDetail, Favorites, légal, NotFound
 ├─ shared/
 │  ├─ ui/               design system (Button, Badge, Dialog, Select…)
-│  └─ lib/              client HTTP, utils, hooks transverses
+│  └─ lib/              client HTTP, stripHtml, utils, hooks transverses
 └─ test/                setup Vitest
 ```
 
