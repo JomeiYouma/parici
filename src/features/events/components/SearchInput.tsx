@@ -1,5 +1,5 @@
 import { Search, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { useDebouncedValue } from '@/shared/lib/useDebouncedValue'
@@ -9,7 +9,9 @@ import { applyFilters } from '../filters'
 /**
  * Champ de recherche. Saisie locale → debounce 300 ms → `setSearchParams`
  * (replace, pour ne pas polluer l'historique à chaque frappe). L'URL reste la
- * source de vérité ; le champ se resynchronise si l'URL change (ex. reset).
+ * source de vérité ; le champ se resynchronise UNIQUEMENT si l'URL change de
+ * l'extérieur (reset, lien partagé) — jamais en réponse à notre propre écriture,
+ * sinon une frappe arrivée pendant un rafraîchissement serait écrasée.
  */
 export function SearchInput() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -17,20 +19,26 @@ export function SearchInput() {
   const [value, setValue] = useState(urlQuery)
   const debounced = useDebouncedValue(value, 300)
 
-  // Pousse la valeur debouncée vers l'URL quand elle diffère.
+  // Dernière valeur que CE champ a synchronisée avec l'URL : sert à distinguer
+  // nos propres mises à jour d'un changement d'URL venu d'ailleurs.
+  const lastSynced = useRef(urlQuery)
+
+  // Pousse la valeur debouncée vers l'URL quand elle diffère de la dernière sync.
   useEffect(() => {
-    setSearchParams(
-      (prev) => {
-        if (debounced === (prev.get('q') ?? '')) return prev
-        return applyFilters(prev, { q: debounced })
-      },
-      { replace: true },
-    )
+    if (debounced === lastSynced.current) return
+    lastSynced.current = debounced
+    setSearchParams((prev) => applyFilters(prev, { q: debounced }), {
+      replace: true,
+    })
   }, [debounced, setSearchParams])
 
-  // Resynchronise le champ si l'URL change de l'extérieur (reset, lien partagé).
+  // N'adopte la valeur de l'URL que si elle est externe (≠ ce qu'on a poussé).
+  // Évite d'effacer une saisie en cours pendant que la liste se rafraîchit.
   useEffect(() => {
-    setValue(urlQuery)
+    if (urlQuery !== lastSynced.current) {
+      lastSynced.current = urlQuery
+      setValue(urlQuery)
+    }
   }, [urlQuery])
 
   return (
