@@ -18,7 +18,12 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
-      <ScrollRestoration />
+      {/*
+        Indexe la position de scroll par pathname : changer un filtre (même
+        route, seuls les searchParams varient) ne fait plus remonter en haut.
+        Un changement de route réel (ex. /event/:id) garde son scroll propre.
+      */}
+      <ScrollRestoration getKey={(location) => location.pathname} />
     </div>
   )
 }
