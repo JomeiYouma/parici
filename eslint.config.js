@@ -6,6 +6,11 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   { ignores: ['dist', 'coverage'] },
+  // Fonctions serverless (/api) : environnement Node, pas navigateur.
+  {
+    files: ['api/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
