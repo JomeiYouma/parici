@@ -1,5 +1,6 @@
-import { Loader2, Search, Sparkles } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { Info, Loader2, Search, Sparkles } from 'lucide-react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 
 import { scrollToEvents } from '@/features/events/anchor'
@@ -18,6 +19,13 @@ export function HeroAiSearch() {
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const [hint, setHint] = useState<string | null>(null)
+
+  // La notif se ferme toute seule après quelques secondes.
+  useEffect(() => {
+    if (!hint) return
+    const timer = setTimeout(() => setHint(null), 6000)
+    return () => clearTimeout(timer)
+  }, [hint])
 
   const keywordSearch = (text: string) =>
     setSearchParams((prev) =>
@@ -52,7 +60,9 @@ export function HeroAiSearch() {
     } else {
       keywordSearch(text)
       if (result.status === 'not_configured') {
-        setHint('Pas de clé OpenAI configurée.')
+        setHint('Clé OpenAI non configurée.')
+      } else {
+        setHint(result.message)
       }
     }
     scrollToEvents()
@@ -92,11 +102,20 @@ export function HeroAiSearch() {
         </button>
       </form>
 
-      {hint && (
-        <p className="mt-3 text-sm text-ink-muted" aria-live="polite">
-          {hint}
-        </p>
-      )}
+      {hint &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-surface-border bg-surface px-4 py-2.5 text-sm font-medium text-navy shadow-lg">
+              <Info className="size-4 shrink-0 text-magenta" aria-hidden />
+              <span>{hint}</span>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

@@ -50,12 +50,10 @@ export async function requestAiFilters(
     return { status: 'error', message: 'Impossible de contacter la recherche IA.' }
   }
 
+  // 404 = fonction serverless absente (dev local sans `vercel dev`) : du point de
+  // vue utilisateur, l'IA n'est pas opérationnelle → même message que sans clé.
   if (response.status === 404) {
-    return {
-      status: 'error',
-      message:
-        'La recherche IA n’est disponible que sur le déploiement (fonction serverless).',
-    }
+    return { status: 'not_configured' }
   }
 
   if (!response.ok) {
