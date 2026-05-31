@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/*
+ * Design system « Summer Sorbet ».
+ * Chaque couleur a un rôle unique (cf. docs/DEMARCHE.md §3). Ne pas employer
+ * une teinte hors de son rôle.
+ */
+@theme {
+  /* Palette */
+  --color-navy: #083d77; /* Texte / ink */
+  --color-paper: #ebebd3; /* Fond de page */
+  --color-magenta: #da4167; /* Accent : CTA, filtre actif, favori */
+  --color-magenta-strong: #c5395c; /* Variante AA pour petit texte sur fond clair */
+  --color-coral: #f78764; /* Secondaire : tags catégorie, survols */
+  --color-gold: #f4d35e; /* Highlight : badge « Gratuit », mises en avant */
+
+  /* Surfaces dérivées */
+  --color-surface: #fafaf2; /* Cartes (blanc cassé) */
+  --color-surface-border: #dcdcc2; /* Bordures douces */
+  --color-ink-muted: #5a6e8c; /* Texte secondaire (navy désaturé) */
+
+  /* Typographie */
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+
+  /* Rayons */
+  --radius-card: 12px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-navy);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Focus visible cohérent et accessible sur tout l'UI */
+  :focus-visible {
+    outline: 2px solid var(--color-magenta);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Respecte le réglage système : on coupe toute animation non essentielle */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Masque visuel mais accessible aux lecteurs d'écran */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
