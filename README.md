@@ -7,6 +7,8 @@
 Une application web single-page pour trouver facilement concerts, expositions,
 spectacles et sorties à Paris — propulsée par l’agenda open data de la Ville de Paris.
 
+**[parici-murex.vercel.app](https://parici-murex.vercel.app)**
+
 [![CI](https://github.com/JomeiYouma/parici/actions/workflows/ci.yml/badge.svg)](https://github.com/JomeiYouma/parici/actions/workflows/ci.yml)
 
 </div>
